@@ -1,0 +1,1 @@
+Calculate which side has more total weight and animate the scale tipping accordingly.
