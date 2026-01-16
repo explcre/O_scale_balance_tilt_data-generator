@@ -1,14 +1,7 @@
-"""Scale Balance Tilt Task Prompts - Precise version."""
+"""Scale Balance Tilt Task Prompts - Clean version matching video exactly."""
 
 def get_prompt(task_data: dict) -> str:
-    """Generate a precise prompt that uniquely determines the video output.
-    
-    The prompt specifies:
-    - The weights on each side
-    - That the heavier side tips DOWN
-    - The stopping condition (lower pan reaches base level - red dashed line)
-    - The highlighting of the heavier side
-    """
+    """Generate prompt that exactly describes what happens in the video."""
     left_weights = task_data["left_weights"]
     right_weights = task_data["right_weights"]
     total_left = task_data["total_left"]
@@ -18,23 +11,18 @@ def get_prompt(task_data: dict) -> str:
     left_str = " + ".join(str(w) for w in left_weights)
     right_str = " + ".join(str(w) for w in right_weights)
     
-    prompt = f"""A balance scale has weights on both sides:
-- LEFT pan: {left_str} = {total_left}
-- RIGHT pan: {right_str} = {total_right}
+    prompt = f"""Balance scale with weights on both pans:
+- LEFT: {left_str} = {total_left}
+- RIGHT: {right_str} = {total_right}
 
-The scale starts balanced (beam horizontal). Calculate which side is heavier.
-The heavier side will tip DOWN. The animation shows:
-1. The beam tilts so the heavier side's pan moves downward
-2. The tilting stops when the lower pan reaches the base level (shown as a red dashed line)
-3. The heavier side's pan is highlighted in red
+The scale starts balanced. The heavier side tips DOWN.
+The beam tilts until the lower pan reaches the base level (red dashed line appears).
+The heavier pan is highlighted in red.
 
-Which side tips down? Show the tilting animation until the stopping condition is met."""
+Answer: {heavier_side.upper()} side tips down ({total_left if heavier_side == "left" else total_right} > {total_right if heavier_side == "left" else total_left})."""
 
     return prompt
 
 
 def get_all_prompts() -> list[str]:
-    """Return example prompts."""
-    return [
-        "Balance scale with labeled weights. Heavier side tips DOWN until lower pan reaches base level (red dashed line)."
-    ]
+    return ["Scale tilts until lower pan reaches base level, heavier pan highlighted red."]
