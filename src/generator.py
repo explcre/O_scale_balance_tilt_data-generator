@@ -1,8 +1,6 @@
 """
-Scale Balance Tilt Task Generator - Clean version.
-
-Rotation: Left heavy = counter-clockwise (left down), Right heavy = clockwise (right down)
-Stop: When lower pan reaches base level (red dashed line)
+Scale Balance Tilt Task Generator - Fixed version.
+Removed LEFT/RIGHT text, sum labels move with pans.
 """
 
 import random
@@ -91,7 +89,6 @@ class TaskGenerator(BaseGenerator):
         sin_angle = min(0.9, vertical_displacement / half_beam)
         angle_deg = math.degrees(math.asin(sin_angle))
         
-        # Left heavy = negative (counter-clockwise), Right heavy = positive (clockwise)
         return -angle_deg if heavier_side == "left" else angle_deg
     
     def _draw_weight_box(self, draw: ImageDraw.Draw, x: int, y: int, weight: int, color: tuple):
@@ -191,18 +188,25 @@ class TaskGenerator(BaseGenerator):
                     wx = pan_x - pan_width // 2 + spacing * (i + 1)
                     self._draw_weight_box(draw, wx, pan_y, w, self.config.weight_color)
         
-        # Labels
+        # Sum labels BELOW pans (move with pans)
         try:
-            font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 12)
+            font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 14)
         except:
             font = ImageFont.load_default()
         
-        draw.text((left_pan_x - 20, pivot_y - 50), "LEFT", fill=(80, 80, 80), font=font)
-        draw.text((right_pan_x - 25, pivot_y - 50), "RIGHT", fill=(80, 80, 80), font=font)
-        draw.text((left_pan_x - 25, left_pan_y + pan_height + 15), 
-                 f"Sum: {task_data['total_left']}", fill=(100, 100, 100), font=font)
-        draw.text((right_pan_x - 25, right_pan_y + pan_height + 15),
-                 f"Sum: {task_data['total_right']}", fill=(100, 100, 100), font=font)
+        # Left sum label
+        left_sum_text = f"Sum: {task_data['total_left']}"
+        bbox = draw.textbbox((0, 0), left_sum_text, font=font)
+        text_width = bbox[2] - bbox[0]
+        draw.text((left_pan_x - text_width // 2, left_pan_y + pan_height + 15), 
+                 left_sum_text, fill=(100, 100, 100), font=font)
+        
+        # Right sum label
+        right_sum_text = f"Sum: {task_data['total_right']}"
+        bbox = draw.textbbox((0, 0), right_sum_text, font=font)
+        text_width = bbox[2] - bbox[0]
+        draw.text((right_pan_x - text_width // 2, right_pan_y + pan_height + 15),
+                 right_sum_text, fill=(100, 100, 100), font=font)
     
     def _render_initial_state(self, task_data: dict) -> Image.Image:
         width, height = self.config.image_size
